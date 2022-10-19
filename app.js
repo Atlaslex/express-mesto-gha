@@ -1,11 +1,9 @@
-
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const express = require('express');
 const cors = require('cors');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
-
 
 const { PORT = 3000 } = process.env;
 
@@ -19,7 +17,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
   req.user = {
-    _id: '634f3431a9fe1ac62ed8b849'
+    _id: '634f3431a9fe1ac62ed8b849',
   };
 
   next();
@@ -28,8 +26,10 @@ app.use((req, res, next) => {
 app.use('/', userRouter);
 app.use('/', cardRouter);
 
-
+app.use('*', (req, res) => {
+  res.status(404).send({ message: 'Запрашиваемый адрес запроса не найден' });
+});
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
-  });
+});
