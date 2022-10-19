@@ -1,18 +1,12 @@
 const Card = require('../models/card');
 
 const {
-  CORRECT_CODE,
-  CREATE_CODE,
-  BAD_REQUEST_CODE,
-  NOT_FOUND_CODE,
-  SERVER_ERROR_CODE,
-} = require('../utils/errorcodes');
-
-module.exports.getCards = (req, res) => {
-  Card.find({})
-    .then((card) => res.status(CORRECT_CODE).send(card))
-    .catch(() => res.status(SERVER_ERROR_CODE).send({ message: 'Ошибка по-умолчанию' }));
-};
+  OK,
+  CREATED,
+  BAD_REQUEST,
+  NOT_FOUND,
+  INTERNAL_SERVER_ERROR,
+} = require('../errors/errorcodes');
 
 module.exports.createCard = (req, res) => {
   const owner = req.user._id;
@@ -23,19 +17,19 @@ module.exports.createCard = (req, res) => {
     owner,
   })
     .then((card) => {
-      res.status(CREATE_CODE).send(card);
+      res.status(CREATED).send(card);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res
-          .status(BAD_REQUEST_CODE)
+          .status(BAD_REQUEST)
           .send({
-            message: 'Переданы некорректные данные при создании карточки',
+            message: 'Некорректные данные при создании карточки',
           });
       }
       return res
-        .status(SERVER_ERROR_CODE)
-        .send({ message: 'Ошибка по умоланию' });
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: 'Ошибка по-умолчанию' });
     });
 };
 
@@ -44,23 +38,29 @@ module.exports.deleteCard = (req, res) => {
     .then((card) => {
       if (!card) {
         return res
-          .status(NOT_FOUND_CODE)
-          .send({ message: 'Запрашиваемая карточка не найдена' });
+          .status(NOT_FOUND)
+          .send({ message: 'Карточка не найдена' });
       }
-      return res.status(CORRECT_CODE).send(card);
+      return res.status(OK).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         return res
-          .status(BAD_REQUEST_CODE)
+          .status(BAD_REQUEST)
           .send({
-            message: 'Переданы некорректные данные для удаления карточки',
+            message: 'Некорректные данные для удаления карточки',
           });
       }
       return res
-        .status(SERVER_ERROR_CODE)
-        .send({ message: 'Ошибка по умоланию' });
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: 'Ошибка по-умолчанию' });
     });
+};
+
+module.exports.getCards = (req, res) => {
+  Card.find({})
+    .then((card) => res.status(OK).send(card))
+    .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по-умолчанию' }));
 };
 
 module.exports.addLikeCard = (req, res) => {
@@ -72,22 +72,22 @@ module.exports.addLikeCard = (req, res) => {
     .then((card) => {
       if (!card) {
         return res
-          .status(NOT_FOUND_CODE)
-          .send({ message: 'Запрашиваемая карточка не найдена' });
+          .status(NOT_FOUND)
+          .send({ message: 'Карточка не найдена' });
       }
-      return res.status(CORRECT_CODE).send({ data: card });
+      return res.status(OK).send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         return res
-          .status(BAD_REQUEST_CODE)
+          .status(BAD_REQUEST)
           .send({
-            message: 'Переданы некорректные данные для постановки лайка',
+            message: 'Некорректные данные для лайка карточки',
           });
       }
       return res
-        .status(SERVER_ERROR_CODE)
-        .send({ message: 'Ошибка по умоланию' });
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: 'Ошибка по-умолчанию' });
     });
 };
 
@@ -100,19 +100,19 @@ module.exports.delLikeCard = (req, res) => {
     .then((card) => {
       if (!card) {
         return res
-          .status(NOT_FOUND_CODE)
-          .send({ message: 'Запрашиваемая карточка не найдена' });
+          .status(NOT_FOUND)
+          .send({ message: 'Карточка не найдена' });
       }
-      return res.status(CORRECT_CODE).send({ data: card });
+      return res.status(OK).send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
         return res
-          .status(BAD_REQUEST_CODE)
-          .send({ message: 'Переданы некорректные данные для  снятии лайка' });
+          .status(BAD_REQUEST)
+          .send({ message: 'Некорректные данные для снятия лайка' });
       }
       return res
-        .status(SERVER_ERROR_CODE)
-        .send({ message: 'Ошибка по умоланию' });
+        .status(INTERNAL_SERVER_ERROR)
+        .send({ message: 'Ошибка по-умолчанию' });
     });
 };
