@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const express = require('express');
 const cors = require('cors');
+const { errors } = require('celebrate');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 
@@ -29,6 +30,7 @@ app.use('/', cardRouter);
 app.use('*', (req, res) => {
   res.status(404).send({ message: 'Запрашиваемый адрес запроса не найден' });
 });
+app.use(errors());
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
