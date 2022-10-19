@@ -1,118 +1,104 @@
-const Users = require('../models/user');
-const { ValidationErrors, NotFoundError } = require('../errors/Errors');
+const User = require('../models/user');
+
+const {
+  CORRECT_CODE,
+  CREATE_CODE,
+  BAD_REQUEST_CODE,
+  NOT_FOUND_CODE,
+  SERVER_ERROR_CODE,
+} = require('../utils/errorcodes');
 
 module.exports.getUsers = (req, res) => {
-  const validationError = new ValidationErrors('Переданы некорректные данные при создании пользователя.');
-  Users.find({})
-    .then(user => res.send(user))
-    .catch((err) => {
-      let status = 500;
-      let message = 'Произошла ошибка';
-      // eslint-disable-next-line default-case
-      switch (err.name) {
-        case validationError.name:
-          status = validationError.statusCode;
-          message = validationError.message;
-          break;
-      }
-      res.status(status).send(message);
-    });
+  User.find({})
+    .then((user) => res.status(CORRECT_CODE).send(user))
+    .catch(() => res.status(SERVER_ERROR_CODE).send({ message: 'Ошибка по-умолчанию' }));
 };
 
 module.exports.getUserById = (req, res) => {
-  const notFoundError = new NotFoundError('Пользователь по указанному _id не найден.');
-  Users.findById(req.params.id).orFail(notFoundError)
-    .then(user => res.send(user))
-    .catch((err) => {
-      let status = 500;
-      let message = 'Произошла ошибка';
-      // eslint-disable-next-line default-case
-      switch (err.name) {
-        case notFoundError.name:
-          status = notFoundError.statusCode;
-          message = notFoundError.message;
-          break;
+  User.findById(req.params.userId)
+    .then((user) => {
+      if (!user) {
+        return res
+          .status(NOT_FOUND_CODE)
+          .send({ message: 'Запрашиваемый пользователь не найден' });
       }
-      res.status(status).send(message);
+      return res.status(CORRECT_CODE).send(user);
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res
+          .status(BAD_REQUEST_CODE)
+          .send({ message: 'Переданы некорректные данные для запроса' });
+      }
+      return res
+        .status(SERVER_ERROR_CODE)
+        .send({ message: 'Ошибка по умоланию' });
     });
 };
 
 module.exports.createUser = (req, res) => {
-  const validationError = new ValidationErrors('Переданы некорректные данные при создании пользователя.');
-  const data = req.body;
-  Users.create(data)
-    .then(user => res.send({ data: user }))
+  User.create(req.body)
+    .then((user) => res.status(CREATE_CODE).send({ data: user }))
     .catch((err) => {
-      let status = 500;
-      let message = 'Произошла ошибка';
-      // eslint-disable-next-line default-case
-      switch (err.name) {
-        case validationError.name:
-          status = validationError.statusCode;
-          message = validationError.message;
-          break;
+      if (err.name === 'ValidationError') {
+        return res.status(BAD_REQUEST_CODE).send({
+          message: 'Переданы некорректные данные при создании пользователя',
+        });
       }
-      res.status(status).send(message);
+      return res
+        .status(SERVER_ERROR_CODE)
+        .send({ message: 'Ошибка по умоланию' });
     });
 };
 
-module.exports.updateUser = (req, res) => {
-  if (!(req.body.name && req.body.about)) {
-    throw res.status(400).send('Переданы некорректные данные при обновлении профиля');
-  }
-  const { name, about } = req.body;
-  const notFoundError = new NotFoundError('Пользователь с указанным _id не найден.');
-  Users.findByIdAndUpdate(
-    req.user._id,
-    { name, about },
-    {
-      new: true,
-      runValidators: true,
-      upsert: false
-    }
-  ).orFail(notFoundError)
-    .then(user => res.send(user))
-    .catch((err) => {
-      let status = 500;
-      let message = 'Произошла ошибка';
-      // eslint-disable-next-line default-case
-      switch (err.name) {
-        case notFoundError.name:
-          status = notFoundError.statusCode;
-          message = notFoundError.message;
-          break;
+module.exports.updateProfile = (req, res) => {
+  User.findByIdAndUpdate(req.user._id, req.body, {
+    new: true,
+    runValidators: true,
+  })
+    .then((user) => {
+      if (!user) {
+        return res
+          .status(NOT_FOUND_CODE)
+          .send({ message: 'Запрашиваемый пользователь не найден' });
       }
-      res.status(status).send(message);
+      return res.status(CORRECT_CODE).send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        return res.status(BAD_REQUEST_CODE).send({
+          message: 'Переданы некорректные данные при обновлении профиля',
+        });
+      }
+
+      return res
+        .status(SERVER_ERROR_CODE)
+        .send({ message: 'Ошибка по умоланию' });
     });
 };
 
-module.exports.updateAvatarUser = (req, res) => {
-  if (!req.body.avatar) {
-    throw res.status(400).send('Переданы некорректные данные при обновлении аватара.');
-  }
-  const { avatar } = req.body;
-  const notFoundError = new NotFoundError('Пользователь с указанным _id не найден.');
-
-  Users.findByIdAndUpdate(
-    req.user._id,
-    { avatar },
-    {
-      new: true,
-      runValidators: true
-    }
-  ).orFail(notFoundError)
-    .then(user => res.send(user))
-    .catch((err) => {
-      console.dir(err);
-      let status = 500;
-      let message = 'Произошла ошибка';
-      // eslint-disable-next-line default-case
-      switch (err.name) {
-        case notFoundError.name:
-          status = notFoundError.statusCode;
-          message = notFoundError.message;
-          break;
+module.exports.updateAvatar = (req, res) => {
+  User.findByIdAndUpdate(req.user._id, req.body, {
+    new: true,
+    runValidators: true,
+  })
+    .then((user) => {
+      if (!user) {
+        return res
+          .status(NOT_FOUND_CODE)
+          .send({ message: 'Запрашиваемый пользователь не найден' });
       }
-      res.status(status).send(message);
+      return res.status(CORRECT_CODE).send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError' || err.name === 'ValidationError') {
+        return res.status(BAD_REQUEST_CODE).send({
+          message: 'Переданы некорректные данные при обновлении аватара',
+        });
+      }
+
+      return res
+        .status(SERVER_ERROR_CODE)
+        .send({ message: 'Ошибка по умоланию!' });
     });
 };
