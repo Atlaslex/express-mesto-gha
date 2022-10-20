@@ -52,7 +52,8 @@ module.exports.getUserById = (req, res) => {
 };
 
 module.exports.updateAvatar = (req, res) => {
-  User.findByIdAndUpdate(req.user._id, req.body.avatar, {
+  const { avatar } = req.body;
+  User.findByIdAndUpdate(req.user._id, { avatar }, {
     new: true,
     runValidators: true,
   })
@@ -78,7 +79,9 @@ module.exports.updateAvatar = (req, res) => {
 };
 
 module.exports.updateProfile = (req, res) => {
-  User.findByIdAndUpdate(req.user._id, req.body.name, req.body.about, {
+  const { name } = req.body;
+  const { about } = req.body;
+  User.findByIdAndUpdate(req.user._id, { name, about }, {
     new: true,
     runValidators: true,
   })
