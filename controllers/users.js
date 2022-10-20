@@ -52,7 +52,7 @@ module.exports.getUserById = (req, res) => {
 };
 
 module.exports.updateAvatar = (req, res) => {
-  User.findByIdAndUpdate(req.user._id, req.body, {
+  User.findByIdAndUpdate(req.user._id, req.body.avatar, {
     new: true,
     runValidators: true,
   })
@@ -78,7 +78,7 @@ module.exports.updateAvatar = (req, res) => {
 };
 
 module.exports.updateProfile = (req, res) => {
-  User.findByIdAndUpdate(req.user._id, req.body, {
+  User.findByIdAndUpdate(req.user._id, req.body.name, req.body.about, {
     new: true,
     runValidators: true,
   })
