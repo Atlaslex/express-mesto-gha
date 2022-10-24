@@ -13,7 +13,7 @@ const { LinksRegExp, EmailRegExp } = require('./utils/all-reg-exp');
 const { PORT = 3000 } = process.env;
 const app = express();
 
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
+mongoose.connect('mongodb://localhost:27017/mestodb');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -32,7 +32,7 @@ app.post('/signup', celebrate({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
     avatar: Joi.string().pattern(LinksRegExp),
-    email: Joi.string().required().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net', 'ru'] } }), // В main удалить все связи
+    email: Joi.string().required().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net', 'ru'] } }),
     password: Joi.string().min(2).required(),
   }),
 }), createUser);
@@ -42,4 +42,5 @@ app.use(errors());
 app.use(errorPage, errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`App listening on port ${PORT} / Приложение запущено, используется порт ${PORT}.`);
+  console.log(`Приложение запущено, используется порт ${PORT}.`);
+});
