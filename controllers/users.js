@@ -17,6 +17,40 @@ const {
   CREATE_CODE,
 } = require('../utils/correctcodes');
 
+module.exports.createUser = ((req, res, next) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  if (!email || !password) {
+    throw new BadRequestError();
+  }
+  bcrypt
+    .hash(password, SALT_ROUNDS)
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email: req.body.email,
+      password: hash,
+    }))
+    .then((user) => res.status(CREATE_CODE).send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+    }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Некорректные данные для запроса'));
+      }
+      if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
+        next(new NotUniqueEmailError());
+      }
+      next(err);
+    })
+    .catch(next);
+});
+
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((user) => res.status(CORRECT_CODE).send(user))
@@ -48,40 +82,6 @@ module.exports.getUserById = (req, res, next) => {
     })
     .catch(next);
 };
-
-module.exports.createUser = ((req, res, next) => {
-  const {
-    name, about, avatar, email, password,
-  } = req.body;
-  if (!email || !password) {
-    throw new BadRequestError();
-  }
-  bcrypt
-    .hash(password, SALT_ROUNDS)
-    .then((hash) => User.create({
-      name,
-      about,
-      avatar,
-      email: req.body.email,
-      password: hash,
-    }))
-    .then((user) => res.status(CREATE_CODE).send({
-      name: user.name,
-      about: user.about,
-      avatar: user.avatar,
-      email: user.email,
-    }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new BadRequestError('Переданы некорректные данные для запроса'));
-      }
-      if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
-        next(new NotUniqueEmailError());
-      }
-      next(err);
-    })
-    .catch(next);
-});
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
