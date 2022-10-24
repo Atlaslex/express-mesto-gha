@@ -1,6 +1,6 @@
-const BadRequestError = require('../errors/bad-request-error');
-const NotFoundError = require('../errors/not-found-error');
-const BadRequireToken = require('../errors/bad-require-token');
+const BadRequestError = require('../utils/errorcodes/bad-request-error');
+const NotFoundError = require('../utils/errorcodes/not-found-error');
+const BadRequireToken = require('../utils/errorcodes/bad-require-token');
 
 const Card = require('../models/card');
 
@@ -20,7 +20,7 @@ module.exports.createCard = (req, res, next) => {
   Card.create({
     name,
     link,
-    owner: req.user._id,
+    owner: req.user.id,
   })
     .then((card) => {
       res.status(CREATE_CODE).send(card);

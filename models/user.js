@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const NotDataError = require('../utils/errorcodes/not-pass-or-email');
 const { LinksRegExp } = require('../utils/all-reg-exp');
-const NotDataError = require('../errors/not-pass-or-email');
 
 const {
   userNameValidator,

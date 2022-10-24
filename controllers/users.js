@@ -5,11 +5,11 @@ const SECRET_KEY = 'very_secret';
 const MONGO_DUPLICATE_ERROR_CODE = 11000;
 const SALT_ROUNDS = 10;
 
-const BadRequestError = require('../errors/bad-request-error');
-const BadRequireToken = require('../errors/bad-require-token');
-const NotFoundError = require('../errors/not-found-error');
-const NotUniqueEmailError = require('../errors/not-unique-email');
-const NotDataError = require('../errors/not-pass-or-email');
+const BadRequestError = require('../utils/errorcodes/bad-request-error');
+const BadRequireToken = require('../utils/errorcodes/bad-require-token');
+const NotFoundError = require('../utils/errorcodes/not-found-error');
+const NotUniqueEmailError = require('../utils/errorcodes/not-unique-email');
+const NotDataError = require('../utils/errorcodes/not-pass-or-email');
 const User = require('../models/user');
 
 const {
