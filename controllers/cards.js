@@ -1,118 +1,100 @@
+const BadRequestError = require('../errors/bad-request-error');
+const NotFoundError = require('../errors/not-found-error');
+const BadRequireToken = require('../errors/bad-require-token');
+
 const Card = require('../models/card');
 
 const {
-  OK,
-  CREATED,
-  BAD_REQUEST,
-  NOT_FOUND,
-  INTERNAL_SERVER_ERROR,
-} = require('../errors/errorcodes');
+  CORRECT_CODE,
+  CREATE_CODE,
+} = require('../utils/correctcodes');
 
-module.exports.createCard = (req, res) => {
-  const owner = req.user._id;
+module.exports.getCards = (_req, res, next) => {
+  Card.find({})
+    .then((cards) => res.status(CORRECT_CODE).send(cards))
+    .catch(next);
+};
+
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({
     name,
     link,
-    owner,
+    owner: req.user._id,
   })
     .then((card) => {
-      res.status(CREATED).send(card);
+      res.status(CREATE_CODE).send(card);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res
-          .status(BAD_REQUEST)
-          .send({
-            message: 'Некорректные данные при создании карточки',
-          });
+        next(new BadRequestError());
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: 'Ошибка по-умолчанию' });
-    });
+      next(err);
+    })
+    .catch(next);
 };
 
-module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+module.exports.deleteCard = (req, res, next) => {
+  Card
+    .findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        return res
-          .status(NOT_FOUND)
-          .send({ message: 'Карточка не найдена' });
+        next(new NotFoundError());
       }
-      return res.status(OK).send(card);
+      if (JSON.stringify(card.owner) !== JSON.stringify(req.user.id)) {
+        throw new BadRequireToken();
+      }
+      return Card.findByIdAndRemove(req.params.cardId);
+    })
+    .then((cards) => {
+      res.status(CORRECT_CODE).send(cards);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res
-          .status(BAD_REQUEST)
-          .send({
-            message: 'Некорректные данные для удаления карточки',
-          });
+        next(new BadRequestError());
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: 'Ошибка по-умолчанию' });
+      next(err);
     });
 };
 
-module.exports.getCards = (req, res) => {
-  Card.find({})
-    .then((card) => res.status(OK).send(card))
-    .catch(() => res.status(INTERNAL_SERVER_ERROR).send({ message: 'Ошибка по-умолчанию' }));
-};
-
-module.exports.addLikeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
-    { $addToSet: { likes: req.user._id } },
+    { $addToSet: { likes: req.user.id } },
     { new: true },
   )
     .then((card) => {
       if (!card) {
-        return res
-          .status(NOT_FOUND)
-          .send({ message: 'Карточка не найдена' });
+        throw new NotFoundError();
       }
-      return res.status(OK).send({ data: card });
+      return res.status(CORRECT_CODE).send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res
-          .status(BAD_REQUEST)
-          .send({
-            message: 'Некорректные данные для лайка карточки',
-          });
+        next(new BadRequestError());
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: 'Ошибка по-умолчанию' });
-    });
+      next(err);
+    })
+    .catch(next);
 };
 
-module.exports.delLikeCard = (req, res) => {
+module.exports.delLikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
-    { $pull: { likes: req.user._id } },
+    { $pull: { likes: req.user.id } },
     { new: true },
   )
     .then((card) => {
       if (!card) {
-        return res
-          .status(NOT_FOUND)
-          .send({ message: 'Карточка не найдена' });
+        throw new NotFoundError();
       }
-      return res.status(OK).send({ data: card });
+      return res.status(CORRECT_CODE).send({ data: card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res
-          .status(BAD_REQUEST)
-          .send({ message: 'Некорректные данные для снятия лайка' });
+        next(new BadRequestError());
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .send({ message: 'Ошибка по-умолчанию' });
-    });
+      next(err);
+    })
+    .catch(next);
 };
