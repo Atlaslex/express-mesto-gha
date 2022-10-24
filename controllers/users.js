@@ -74,9 +74,8 @@ module.exports.getUserById = (req, res, next) => {
         next(new BadRequestError());
         return;
       }
-      next();
-    })
-    .catch(next);
+      next(err);
+    });
 };
 
 module.exports.login = (req, res, next) => {
