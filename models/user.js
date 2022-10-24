@@ -7,7 +7,7 @@ const {
   userNameValidator,
   userAboutValidator,
   userEmailValidator,
-  userPasswordValidator,
+  // userPasswordValidator,
 } = require('../validators/validators');
 
 const userSchema = new mongoose.Schema({
@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     select: false,
-    validate: userPasswordValidator,
+    // validate: userPasswordValidator,
   },
 });
 
