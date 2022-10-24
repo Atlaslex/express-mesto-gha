@@ -23,14 +23,7 @@ module.exports.userEmailValidator = [
   }),
 
 ];
-// module.exports.userPasswordValidator = [
-//   validate({
-//     validator: 'isLength',
-//     arguments: [8],
-//     select: false,
-//     message: 'Поле "password" должно содержать не менее {ARGS[0]} символов',
-//   }),
-// ];
+
 module.exports.cardNameValidator = [
   validate({
     validator: 'isLength',

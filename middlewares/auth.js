@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const AuthorizedError = require('../errors/AuthorizedError');
 
 const SECRET_KEY = 'very_secret';
 
@@ -25,7 +26,7 @@ const isAuthorized = ((req, res, next) => {
     });
     req.user = payload;
   } catch (err) {
-    throwUnauthorizedError();
+    next(new AuthorizedError('Авторизуйтесь для доступа'));
   }
 
   next();
