@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const NotDataError = require('../utils/errorcodes/not-pass-or-email');
+const NotDataError = require('../errors/NotPassOrEmail');
 const { LinksRegExp } = require('../utils/all-reg-exp');
 
 const {

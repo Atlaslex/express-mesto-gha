@@ -6,10 +6,10 @@ const routesUser = require('./routes/users');
 const routesCard = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
 const { isAuthorized } = require('./middlewares/auth');
-const { errorHandler } = require('./middlewares/error-handler');
+const { errorHandler } = require('./middlewares/error');
 
 const { LinksRegExp } = require('./utils/all-reg-exp');
-const NotFoundError = require('./utils/errorcodes/not-found-error');
+const NotFoundError = require('./errors/ErrorNotFound');
 
 const { PORT = 3000 } = process.env;
 const app = express();

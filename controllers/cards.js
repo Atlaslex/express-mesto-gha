@@ -1,6 +1,6 @@
-const BadRequestError = require('../utils/errorcodes/bad-request-error');
-const NotFoundError = require('../utils/errorcodes/not-found-error');
-const BadRequireToken = require('../utils/errorcodes/bad-require-token');
+const BadRequestError = require('../errors/ErrorBadRequest');
+const BadRequireToken = require('../errors/TokenBadRequire');
+const NotFoundError = require('../errors/ErrorNotFound');
 
 const Card = require('../models/card');
 
@@ -8,12 +8,6 @@ const {
   CORRECT_CODE,
   CREATE_CODE,
 } = require('../utils/correctcodes');
-
-module.exports.getCards = (_req, res, next) => {
-  Card.find({})
-    .then((cards) => res.status(CORRECT_CODE).send(cards))
-    .catch(next);
-};
 
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
@@ -31,6 +25,12 @@ module.exports.createCard = (req, res, next) => {
       }
       next(err);
     })
+    .catch(next);
+};
+
+module.exports.getCards = (_req, res, next) => {
+  Card.find({})
+    .then((cards) => res.status(CORRECT_CODE).send(cards))
     .catch(next);
 };
 
