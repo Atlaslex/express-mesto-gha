@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
-const { generateToken } = require('../utils/jwt');
+const jwt = require('jsonwebtoken');
 
+const SECRET_KEY = 'very_secret';
 const MONGO_DUPLICATE_ERROR_CODE = 11000;
 const SALT_ROUNDS = 10;
 
@@ -18,18 +19,13 @@ const {
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
-    .then((user) =>
-
-      // eslint-disable-next-line implicit-arrow-linebreak
-      res.status(CORRECT_CODE).send(user))
+    .then((user) => res.status(CORRECT_CODE).send(user))
     .catch(next);
 };
 
 module.exports.getUserSelfInfo = (req, res, next) => {
-  console.log(req.user);
-  User.findById(req.user)
+  User.findById(req.user.id)
     .then((user) => {
-      console.log(user);
       res.status(CORRECT_CODE).send(user);
     })
     .catch(next);
@@ -41,7 +37,7 @@ module.exports.getUserById = (req, res, next) => {
       if (!user) {
         throw new NotFoundError();
       }
-      return res.status(CORRECT_CODE).send(user);
+      res.status(CORRECT_CODE).send(user);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -97,7 +93,7 @@ module.exports.login = (req, res, next) => {
       if (!isPasswordCorrect) {
         throw new NotDataError();
       }
-      return generateToken({ _id: user._id, expiresIn: '7d' });
+      return jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: '7d' });
     })
     .then((token) => {
       res.send({ token });
@@ -106,7 +102,7 @@ module.exports.login = (req, res, next) => {
 };
 
 module.exports.updateProfile = (req, res, next) => {
-  User.findByIdAndUpdate(req.user._id, req.body, {
+  User.findByIdAndUpdate(req.user.id, req.body, {
     new: true,
     runValidators: true,
   })
@@ -126,7 +122,7 @@ module.exports.updateProfile = (req, res, next) => {
 };
 
 module.exports.updateAvatar = (req, res, next) => {
-  User.findByIdAndUpdate(req.user._id, req.body, {
+  User.findByIdAndUpdate(req.user.id, req.body, {
     new: true,
     runValidators: true,
   })
