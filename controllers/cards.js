@@ -73,8 +73,9 @@ module.exports.likeCard = (req, res, next) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         next(new BadRequestError());
+      } else {
+        next(err);
       }
-      next(err);
     })
     .catch(next);
 };
