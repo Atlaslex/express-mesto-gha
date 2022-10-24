@@ -39,10 +39,7 @@ module.exports.createUser = ((req, res, next) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         next(new BadRequestError('Некорректные данные для запроса'));
-      } else {
-        next(err);
-      }
-      if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
+      } else if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
         next(new NotUniqueEmailError());
       } else {
         next(err);
