@@ -19,11 +19,8 @@ const {
 
 module.exports.createUser = ((req, res, next) => {
   const {
-    name, about, avatar, email, password,
+    name, about, avatar, password,
   } = req.body;
-  if (!email || !password) {
-    throw new BadRequestError();
-  }
   bcrypt
     .hash(password, SALT_ROUNDS)
     .then((hash) => User.create({
