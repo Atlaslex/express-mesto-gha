@@ -5,8 +5,8 @@ const SECRET_KEY = 'very_secret';
 const MONGO_DUPLICATE_ERROR_CODE = 11000;
 const SALT_ROUNDS = 10;
 
-const BadRequestError = require('../errors/ErrorBadRequest');
 const BadRequireToken = require('../errors/TokenBadRequire');
+const BadRequestError = require('../errors/ErrorBadRequest');
 const NotFoundError = require('../errors/ErrorNotFound');
 const NotUniqueEmailError = require('../errors/NotUniqueEmail');
 const NotDataError = require('../errors/NotPassOrEmail');
@@ -93,7 +93,7 @@ module.exports.login = (req, res, next) => {
       if (!isPasswordCorrect) {
         throw new NotDataError();
       }
-      return jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: '7d' });
+      return jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: '5d' });
     })
     .then((token) => {
       res.send({ token });
