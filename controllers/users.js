@@ -48,94 +48,95 @@ module.exports.createUser = ((req, res, next) => {
         next(err);
       }
     });
+});
 
-  module.exports.getUsers = (req, res, next) => {
-    User.find({})
-      .then((user) => res.status(CORRECT_CODE).send(user))
-      .catch(next);
-  };
+module.exports.getUsers = (req, res, next) => {
+  User.find({})
+    .then((user) => res.status(CORRECT_CODE).send(user))
+    .catch(next);
+};
 
-  module.exports.getUserSelfInfo = (req, res, next) => {
-    User.findById(req.user.id)
-      .then((user) => {
-        res.status(CORRECT_CODE).send(user);
-      })
-      .catch(next);
-  };
-  module.exports.getUserById = (req, res, next) => {
-    User
-      .findById(req.params.userId)
-      .then((user) => {
-        if (!user) {
-          throw new NotFoundError();
-        }
-        res.status(CORRECT_CODE).send(user);
-      })
-      .catch((err) => {
-        if (err.name === 'CastError') {
-          next(new BadRequestError());
-          return;
-        }
-        next();
-      })
-      .catch(next);
-  };
-
-  module.exports.login = (req, res, next) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      throw new BadRequireToken();
-    }
-    User.findUserByCredentials(email, password)
-      .then(([user, isPasswordCorrect]) => {
-        if (!isPasswordCorrect) {
-          throw new NotDataError();
-        }
-        return jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: '5d' });
-      })
-      .then((token) => {
-        res.send({ token });
-      })
-      .catch(next);
-  };
-
-  module.exports.updateProfile = (req, res, next) => {
-    User.findByIdAndUpdate(req.user.id, req.body, {
-      new: true,
-      runValidators: true,
+module.exports.getUserSelfInfo = (req, res, next) => {
+  User.findById(req.user.id)
+    .then((user) => {
+      res.status(CORRECT_CODE).send(user);
     })
-      .then((user) => {
-        if (!user) {
-          throw new NotFoundError();
-        }
-        return res.status(CORRECT_CODE).send({ data: user });
-      })
-      .catch((err) => {
-        if (err.name === 'CastError') {
-          next(new BadRequestError());
-        }
-        next(err);
-      })
-      .catch(next);
-  };
-
-  module.exports.updateAvatar = (req, res, next) => {
-    User.findByIdAndUpdate(req.user.id, req.body, {
-      new: true,
-      runValidators: true,
+    .catch(next);
+};
+module.exports.getUserById = (req, res, next) => {
+  User
+    .findById(req.params.userId)
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError();
+      }
+      res.status(CORRECT_CODE).send(user);
     })
-      .then((user) => {
-        if (!user) {
-          throw new NotFoundError();
-        }
-        return res.status(CORRECT_CODE).send({ data: user });
-      })
-      .catch((err) => {
-        if (err.name === 'CastError') {
-          next(new BadRequestError());
-        }
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError());
+        return;
+      }
+      next();
+    })
+    .catch(next);
+};
 
-        next(err);
-      })
-      .catch(next);
-  };
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    throw new BadRequireToken();
+  }
+  User.findUserByCredentials(email, password)
+    .then(([user, isPasswordCorrect]) => {
+      if (!isPasswordCorrect) {
+        throw new NotDataError();
+      }
+      return jwt.sign({ id: user._id }, SECRET_KEY, { expiresIn: '5d' });
+    })
+    .then((token) => {
+      res.send({ token });
+    })
+    .catch(next);
+};
+
+module.exports.updateProfile = (req, res, next) => {
+  User.findByIdAndUpdate(req.user.id, req.body, {
+    new: true,
+    runValidators: true,
+  })
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError();
+      }
+      return res.status(CORRECT_CODE).send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError());
+      }
+      next(err);
+    })
+    .catch(next);
+};
+
+module.exports.updateAvatar = (req, res, next) => {
+  User.findByIdAndUpdate(req.user.id, req.body, {
+    new: true,
+    runValidators: true,
+  })
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError();
+      }
+      return res.status(CORRECT_CODE).send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        next(new BadRequestError());
+      }
+
+      next(err);
+    })
+    .catch(next);
+};
