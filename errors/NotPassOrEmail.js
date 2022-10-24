@@ -1,7 +1,7 @@
 module.exports = class NotDataError extends Error {
   constructor(message) {
     super(message);
-    this.message = 'Не правильный пароль или емейл';
+    this.message = 'Неверный пароль или email';
     this.statusCode = 401;
   }
 };

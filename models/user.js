@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
       validator(v) {
         return LinksRegExp.test(v);
       },
-      message: (props) => `${props.value} is not a valid URL-link!/${props.value} Не верный формат URL-ссылки!!`,
+      message: (props) => `${props.value} Неверный формат URL-ссылки!`,
     },
   },
 
