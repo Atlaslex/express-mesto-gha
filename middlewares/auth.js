@@ -1,5 +1,7 @@
-const { checkToken } = require('../utils/jwt');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+
+const SECRET_KEY = 'very_secret';
 
 const throwUnauthorizedError = () => {
   const error = new Error('Авторизуйтесь для доступа');
@@ -11,24 +13,22 @@ const isAuthorized = ((req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization) {
-    throw res.status(401).send({ message: 'Необходима авторизация' });
+    throw throwUnauthorizedError();
   }
-  const token = authorization.replace('Bearer ', '');
   try {
-    const payload = checkToken(token);
-
+    const token = () => jwt.verify(authorization.replace('Bearer ', ''), SECRET_KEY);
+    const payload = token();
     User.findOne({ id: payload._id }).then((user) => {
       if (!user) {
         throwUnauthorizedError();
       }
-
-      req.user = { _id: user._id };
-
-      next();
     });
+    req.user = payload;
   } catch (err) {
     throwUnauthorizedError();
   }
+
+  next();
 });
 
 module.exports = { isAuthorized };
