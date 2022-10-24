@@ -1,6 +1,5 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
-// const { log } = require('../middlewares/consolelog');
 const { LinksRegExp } = require('../utils/all-reg-exp');
 
 const {

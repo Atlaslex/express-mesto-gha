@@ -6,9 +6,10 @@ const routesUser = require('./routes/users');
 const routesCard = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
 const { isAuthorized } = require('./middlewares/auth');
-const { errorPage, errorHandler } = require('./middlewares/error-handler');
+const { errorHandler } = require('./middlewares/error-handler');
 
-const { LinksRegExp, EmailRegExp } = require('./utils/all-reg-exp');
+const { LinksRegExp } = require('./utils/all-reg-exp');
+const NotFoundError = require('./errors/not-found-error');
 
 const { PORT = 3000 } = process.env;
 const app = express();
@@ -22,11 +23,10 @@ app.use('/users', isAuthorized, routesUser);
 app.use('/cards', isAuthorized, routesCard);
 app.post('/signin', celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required().pattern(EmailRegExp),
+    email: Joi.string().required().email({ minDomainSegments: 2, tlds: { allow: ['com', 'net', 'ru'] } }),
     password: Joi.string().min(2).max(30).required(),
   }),
 }), login);
-
 app.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().min(2).max(30),
@@ -37,10 +37,12 @@ app.post('/signup', celebrate({
   }),
 }), createUser);
 
+app.use((req, res, next) => {
+  next(new NotFoundError());
+});
 app.use(errors());
-
-app.use(errorPage, errorHandler);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`Приложение запущено, используется порт ${PORT}.`);
+  console.log(`App listening on port ${PORT} / Приложение запущено, используется порт ${PORT}.`);
 });
