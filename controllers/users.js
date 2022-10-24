@@ -5,7 +5,6 @@ const SECRET_KEY = 'very_secret';
 const MONGO_DUPLICATE_ERROR_CODE = 11000;
 const SALT_ROUNDS = 10;
 
-const BadRequireToken = require('../errors/TokenBadRequire');
 const BadRequestError = require('../errors/ErrorBadRequest');
 const NotFoundError = require('../errors/ErrorNotFound');
 const NotUniqueEmailError = require('../errors/NotUniqueEmail');
